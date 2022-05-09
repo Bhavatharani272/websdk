@@ -43,7 +43,25 @@
         });
         hvFaceConfig.setLivenessMode({
           none: 'true'})
-        var result = await HVFaceModule.start(hvFaceConfig,  callbackLiveness);
+        var result = await HVFaceModule.start(hvFaceConfig,  callbackLiveness = (HVError, HVResponse) => {
+        if (HVError) {
+          var para = document.createElement('p');
+          var node = document.createTextNode(JSON.stringify(HVError));
+          para.appendChild(node);
+          var element = document.getElementById('div1');
+          element.appendChild(para);
+        } else {
+          var apiResults = HVResponse.getApiResult();
+          faceImage = HVResponse.getImageBase64();
+          
+
+          var para = document.createElement('p');
+          var node = document.createTextNode(JSON.stringify(HVResponse.getApiResult()));
+          para.appendChild(node);
+          var element = document.getElementById('div1');
+          element.appendChild(para);
+        }
+      };);
         
       }
 
