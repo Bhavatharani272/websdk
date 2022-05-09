@@ -39,7 +39,7 @@
         });
         hvFaceConfig.setLivenessMode({
           none: 'true'})
-        var result = await HVFaceModule.start(hvFaceConfig,  callbackLiveness);
+        var result = await HVFaceModule.start(hvFaceConfig,  await callbackLiveness);
         
       }
       async function runLivenessError() {
@@ -74,7 +74,7 @@
 
 
 
-      callbackLiveness = (HVError, HVResponse) => {
+      async callbackLiveness = (HVError, HVResponse) => {
         if (HVError) {
           // console.log(HVError);
           var para = document.createElement('p');
