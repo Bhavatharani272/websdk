@@ -13,7 +13,7 @@
       HyperSnapSDK.startUserSession();
       var faceImage = '';
 
-      async callbackLiveness = (HVError, HVResponse) => {
+      callbackLiveness = (HVError, HVResponse) => {
         if (HVError) {
           var para = document.createElement('p');
           var node = document.createTextNode(JSON.stringify(HVError));
