@@ -1,34 +1,38 @@
-<html>
-  <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script src="https://hv-camera-web-sg.s3-ap-southeast-1.amazonaws.com/hyperverge-web-sdk@4.1.0/src/sdk.min.js"></script>
-  </head>
-  <body>
-    <script>
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <script src="https://hv-camera-web-sg.s3-ap-southeast-1.amazonaws.com/hyperverge-web-sdk@4.1.0/src/sdk.min.js"></script>
+    </head>
+<body>
 
+    <script>
 
       var jwtToken = 'Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBJZCI6ImJkMzQ5MCIsImhhc2giOiI3YmU5NDFjYWNkMGZkOTQ4MzY0MWI2ZTFlNTRkOTkyZDc3YTdhNWVjNWU5MWJiYTE5ZTQwMzI1ZjFmOTcxODNhIiwiaWF0IjoxNjUyMDc2ODU1LCJleHAiOjE2NTIxMTI4NTUsImp0aSI6IjU3ZDFlMDYxLWMyMGMtNDFlOS1hNzI5LTBkNWQyN2ZiNmI1NSJ9.F00Ro7m3JKhBd0v3HDd6iXbKwgYls0fJQD1NtFSHLPf817scEI0g-u9I9t79acFVTdu8_QDQQNitpNj36L4c3NxzvJg4N0TkFYPJPNVgoIBp4VZSqYc99UNXkBBgQ6KxiJIC0YL0GYOmuGFNXmrGwO_RiuBfQlObXm9Nm8up8o8'
       HyperSnapSDK.init(jwtToken, HyperSnapParams.Region.India);
       HyperSnapSDK.startUserSession();
       var faceImage = '';
-      var docImage = '';
-      function runOCR() {
-        hvDocConfig = new HVDocConfig();
-        hvDocConfigBack = new HVDocConfig();
-        hvDocConfig.setOCRDetails(
-          'https://ind-docs.hyperverge.co/v2.0/readKYC',
-          hvDocConfig.DocumentSide.FRONT,
-          { },
-          { },
-        );
-        HVDocsModule.start(hvDocConfig, callbackOCR);
-      }
-      async function runFaceMatch(){
-        console.log(faceImage);
-        console.log(docImage);
-        await HVNetworkHelper.makeFaceMatchCall(faceImage, docImage, { }, { }, callback);
-        // HVNetworkHelper.makeFaceMatchCall(faceImage, docImage, callbackFaceMatch);
-      }
+
+      callbackLiveness = (HVError, HVResponse) => {
+        if (HVError) {
+          var para = document.createElement('p');
+          var node = document.createTextNode(JSON.stringify(HVError));
+          para.appendChild(node);
+          var element = document.getElementById('div1');
+          element.appendChild(para);
+        } else {
+          var apiResults = HVResponse.getApiResult();
+          faceImage = HVResponse.getImageBase64();
+          
+
+          var para = document.createElement('p');
+          var node = document.createTextNode(JSON.stringify(HVResponse.getApiResult()));
+          para.appendChild(node);
+          var element = document.getElementById('div1');
+          element.appendChild(para);
+        }
+      };
+
       async function runLiveness() {
         hvFaceConfig = new HVFaceConfig();
         hvFaceConfig.setShouldShowInstructionPage(true);
@@ -39,122 +43,22 @@
         });
         hvFaceConfig.setLivenessMode({
           none: 'true'})
-        var result = await HVFaceModule.start(hvFaceConfig,  await callbackLiveness);
-        
-      }
-      async function runLivenessError() {
-        hvFaceConfig = new HVFaceConfig();
-        hvFaceConfig.setShouldShowInstructionPage(true);
-        hvFaceConfig.setLivenessMode({
-          none: 'true'})
-        var result = await HVFaceModule.start(hvFaceConfig,  callbackLivenessError);
+        var result = await HVFaceModule.start(hvFaceConfig,  callbackLiveness);
         
       }
 
-      callbackLivenessError = (HVError, HVResponse) => {
-        if (HVError) { 
-          var para = document.createElement('p');
-          var node = document.createTextNode(JSON.stringify(HVError));
-          para.appendChild(node);
-          var element = document.getElementById('div1');
-          element.appendChild(para);
-          runLivenessError();
-        } else {
-          var apiResults = HVResponse.getApiResult();
-          faceImage = HVResponse.getImageBase64();
-          // console.log(faceImage)
-          var para = document.createElement('p');
-          var node = document.createTextNode(JSON.stringify(HVResponse.getApiResult()));
-          para.appendChild(node);
-          var element = document.getElementById('div1');
-          element.appendChild(para);
-          // console.log(HVResponse.getApiHeaders);
-        }
-      };
 
-
-
-      async callbackLiveness = (HVError, HVResponse) => {
-        if (HVError) {
-          // console.log(HVError);
-          var para = document.createElement('p');
-          var node = document.createTextNode(JSON.stringify(HVError));
-          para.appendChild(node);
-          var element = document.getElementById('div1');
-          element.appendChild(para);
-        } else {
-          var apiResults = HVResponse.getApiResult();
-          // console.log(apiResults.result.live)
-          // console.log(HVResponse)
-          faceImage = HVResponse.getImageBase64();
-          // console.log(faceImage)
-          var para = document.createElement('p');
-          var node = document.createTextNode(JSON.stringify(HVResponse.getApiResult()));
-          para.appendChild(node);
-          var element = document.getElementById('div1');
-          element.appendChild(para);
-          // console.log(HVResponse.getApiHeaders);
-		  if(apiResults.result.live === 'yes'){
-			document.getElementById("button").style.display = "block";
-		  }
-        }
-      };
-
-      callbackOCR = (HVError, HVResponse) => {
-        if (HVError) {
-          var para = document.createElement('p');
-          var node = document.createTextNode(JSON.stringify(HVError));
-          para.appendChild(node);
-          var element = document.getElementById('div1');
-          element.appendChild(para);
-          // console.log(HVError);
-          // console.log(HVResponse.getImageBase64());
-        } else {
-          var apiResults = HVResponse.getApiResult();
-          // console.log(apiResults.result.live)
-          //console.log(apiResults)
-          console.log("OCR FRONT");
-          docImage = HVResponse.getImageBase64();
-          console.log(docImage)
-          var para = document.createElement('p');
-          var node = document.createTextNode(JSON.stringify(HVResponse.getApiResult()));
-          para.appendChild(node);
-          var element = document.getElementById('div1');
-          element.appendChild(para);
-			    document.getElementById("button1").style.display = "block";
-          document.getElementById("button").style.display = "none";
-        }
-      };
-
-      callback = (HVError, HVResponse) => {
-        if (HVError) {
-          var para = document.createElement('p');
-          var node = document.createTextNode(JSON.stringify(HVError));
-          para.appendChild(node);
-          var element = document.getElementById('div1');
-          element.appendChild(para);
-        } else {
-          var apiResults = HVResponse.getApiResult();
-          var para = document.createElement('p');
-          var node = document.createTextNode(JSON.stringify(HVResponse.getApiResult()));
-          para.appendChild(node);
-          var element = document.getElementById('div1');
-          element.appendChild(para);
-			    document.getElementById("button1").style.display = "none";
-          document.getElementById("button").style.display = "none";
-        }
-      };
     </script>
+
+
+
+
     <center><h2>Hyperverge WebSDK Demo</h2></center>
     <div class="container">
       <div class="form-group">
-        <button type="button" onclick="runLivenessError();" class="btn btn-primary">Run Face Liveness - error</button>
         <button type="button" onclick="runLiveness();" class="btn btn-primary">Run Face Liveness</button>
-		<div id="div1"></div>
-		<button type="button" id="button" onclick="runOCR();" class="btn btn-primary" style= "display:none;">Run OCR</button>
-    <button type="button" id="button1" onclick="runFaceMatch();" class="btn btn-primary" style= "display:none;">Run FaceMatch</button>
+        <div id="div1"></div>
       </div>
     </div>
-    
-  </body>
+</body>
 </html>
